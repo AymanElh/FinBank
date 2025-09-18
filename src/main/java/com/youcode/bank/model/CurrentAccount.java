@@ -3,9 +3,8 @@ package com.youcode.bank.model;
 public class CurrentAccount extends BankAccount {
     private double overDraft;
 
-    public CurrentAccount(double overDraft) {
-        super();
-        this.overDraft = overDraft;
+    public CurrentAccount(double balance, Client client) {
+        super(balance, client);
     }
 
     public double getOverDraft() {

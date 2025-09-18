@@ -4,22 +4,22 @@ import java.util.List;
 import java.util.UUID;
 
 public abstract class BankAccount {
+    private static int accountSeq = 1000;
     private String accountId;
     private double balance;
-    private String currency;
     private AccountStatus status;
     private Client owner;
     private List<Transaction> historyOfTransactions;
 
     public BankAccount() {
-        this.accountId = UUID.randomUUID().toString();
+        this.accountId = generateAccountId();
         this.status = AccountStatus.CREATED;
     }
 
-    public BankAccount(double balance, String currency) {
+    public BankAccount(double balance, Client client) {
         this();
         this.balance = balance;
-        this.currency = currency;
+        this.owner = client;
     }
 
     public String getAccountId() {
@@ -38,19 +38,28 @@ public abstract class BankAccount {
         this.balance = balance;
     }
 
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
-
     public AccountStatus getStatus() {
         return status;
     }
 
     public void setStatus(AccountStatus status) {
         this.status = status;
+    }
+
+    public String generateAccountId() {
+        return "ACC-" + (accountSeq++);
+    }
+
+    public Client getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Client owner) {
+        this.owner = owner;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("** Account info ** \n ID: %s, Balance: %.2f", this.accountId, this.balance);
     }
 }
