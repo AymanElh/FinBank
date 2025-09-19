@@ -1,14 +1,24 @@
 package com.youcode.bank.services;
 
+import com.youcode.bank.exceptions.FileOperationException;
+import com.youcode.bank.exceptions.InvalidAmountException;
 import com.youcode.bank.model.BankAccount;
 import com.youcode.bank.model.Transaction;
 import com.youcode.bank.model.TransactionType;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 public class TransactionService {
     public static int transactionCounter = 1;
+
+    private static final String STATEMENTS_DIR = "../statements/";
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 
     public Transaction createTransaction(TransactionType type, double amount) {
         String transactionId = "T" + String.format("%04d", transactionCounter++);
@@ -21,49 +31,43 @@ public class TransactionService {
 
     public boolean processDeposit(BankAccount account, double amount) {
         if (amount <= 0) {
-            System.out.println("Amount cannot be negative");
-            return false;
+            throw new InvalidAmountException(amount);
         }
 
         Transaction transaction = createTransaction(TransactionType.DEPOSIT, amount);
         account.setBalance(account.getBalance() + amount);
 
         account.getHistoryOfTransactions().add(transaction);
-
+        saveTransactionToFile(account.getAccountId(), transaction);
         System.out.println("Deposit of " + amount + " success");
         return true;
     }
 
-    public boolean proceessWithdrawl(BankAccount account, double amount) {
+    public boolean proceessWithdrawl(BankAccount account, double amount) throws InvalidAmountException {
         if (amount <= 0) {
-            System.out.println("Amount should be positive");
-            return false;
+            throw new InvalidAmountException(amount);
         }
 
         if (account.getBalance() < amount) {
-            System.out.println("Balance not enough");
-            // throw exception
-            return false;
+            throw new InvalidAmountException(amount);
         }
 
         Transaction transaction = createTransaction(TransactionType.WITHDRAWAL, amount);
 
         account.setBalance(account.getBalance() - amount);
         account.getHistoryOfTransactions().add(transaction);
-        System.out.println("Withdrawl successfully");
-
+        saveTransactionToFile(account.getAccountId(), transaction);
+        System.out.println("Withdrawal successfully");
         return true;
     }
 
     public boolean processTransfer(BankAccount fromAccount, BankAccount toAccount, double amount) {
         if (amount <= 0) {
-            System.out.println("Error amount should be positive");
-            return false;
+            throw new InvalidAmountException(amount);
         }
 
         if (fromAccount.getBalance() < amount) {
-            System.out.println("error: Sold insufficient");
-            return false;
+            throw new InvalidAmountException(amount);
         }
 
         Transaction transaction = createTransaction(TransactionType.TRANSFER, amount);
@@ -74,6 +78,7 @@ public class TransactionService {
         fromAccount.getHistoryOfTransactions().add(transaction);
         toAccount.getHistoryOfTransactions().add(transaction);
 
+        saveTransferTransactionToFile(fromAccount.getAccountId(), transaction, fromAccount.getAccountId(), toAccount.getAccountId());
         System.out.println("Virement de " + amount + " effect aver success");
         return true;
     }
@@ -95,9 +100,79 @@ public class TransactionService {
                     t.getTransactionId(),
                     t.getType(),
                     t.getAmount(),
-                    t.getTransactionDate()
+                    DATE_FORMAT.format(t.getTransactionDate())
             );
         }
         System.out.println("--------------------------------");
+    }
+
+    private void createStatementDirectory() {
+        File dir = new File(STATEMENTS_DIR);
+        if(!dir.exists()) {
+            dir.mkdirs();
+        }
+    }
+
+    private void saveTransactionToFile(String accountId, Transaction transaction) {
+        createStatementDirectory();
+        String filename = STATEMENTS_DIR + "account_" + accountId + ".txt";
+
+        try (FileWriter writer = new FileWriter(filename, true)) { // true = append mode
+
+            File file = new File(filename);
+            if (file.length() == 0) {
+                writer.write("=== RELEVÉ BANCAIRE - Compte: " + accountId + " ===\n");
+                writer.write("Date | Type | Amount | Source Account | Destination Account\n");
+                writer.write("--------------------------------------------------------\n");
+            }
+
+            // Write transaction
+            String line = String.format("%s | %s | %.2f€ | %s | %s\n",
+                    DATE_FORMAT.format(transaction.getTransactionDate()),
+                    transaction.getType(),
+                    transaction.getAmount(),
+                    (transaction.getType() == TransactionType.DEPOSIT) ? "null" : accountId,
+                    (transaction.getType() == TransactionType.WITHDRAWAL) ? "null" : accountId
+            );
+
+            writer.write(line);
+
+        } catch (IOException e) {
+            throw new FileOperationException("Error writing on file: " + e.getMessage());
+        }
+    }
+
+    private void saveTransferToFile(String fromAccountId, String toAccountId, Transaction transaction) {
+        saveTransferTransactionToFile(fromAccountId, transaction, fromAccountId, toAccountId);
+
+        saveTransferTransactionToFile(toAccountId, transaction, fromAccountId, toAccountId);
+    }
+
+
+    private void saveTransferTransactionToFile(String accountId, Transaction transaction, String sourceAccount, String destAccount) {
+        String filename = STATEMENTS_DIR + "account_" + accountId + ".txt";
+
+        try (FileWriter writer = new FileWriter(filename, true)) {
+            File file = new File(filename);
+            if (file.length() == 0) {
+                writer.write("=== RELEVÉ BANCAIRE - Compte: " + accountId + " ===\n");
+                writer.write("Date | Type | Amount | Source Account | Destination Account\n");
+                writer.write("--------------------------------------------------------\n");
+            }
+
+            // Write transfer transaction
+            String line = String.format("%s | %s | %.2f€ | %s | %s\n",
+                    DATE_FORMAT.format(transaction.getTransactionDate()),
+                    transaction.getType(),
+                    transaction.getAmount(),
+                    sourceAccount,
+                    destAccount
+            );
+
+            writer.write(line);
+
+        } catch (IOException e) {
+            throw new FileOperationException("Error writing on file: " + e.getMessage());
+        }
     }
 }
