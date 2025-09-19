@@ -1,7 +1,7 @@
 package com.youcode.bank.model;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class BankAccount {
     private static int accountSeq = 1000;
@@ -9,7 +9,7 @@ public abstract class BankAccount {
     private double balance;
     private AccountStatus status;
     private Client owner;
-    private List<Transaction> historyOfTransactions;
+    private List<Transaction> historyOfTransactions = new ArrayList<>();
 
     public BankAccount() {
         this.accountId = generateAccountId();
@@ -56,6 +56,14 @@ public abstract class BankAccount {
 
     public void setOwner(Client owner) {
         this.owner = owner;
+    }
+
+    public List<Transaction> getHistoryOfTransactions() {
+        return historyOfTransactions;
+    }
+
+    public void setHistoryOfTransactions(List<Transaction> historyOfTransactions) {
+        this.historyOfTransactions = historyOfTransactions;
     }
 
     @Override
