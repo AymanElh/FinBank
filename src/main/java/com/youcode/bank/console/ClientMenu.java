@@ -40,7 +40,7 @@ public class ClientMenu {
 
     public void show() {
         while (true) {
-            int choice = menuService.displayMenuAndGetChoice("Enter your choice: ", CLIENT_MENU);
+            int choice = menuService.displayMenuAndGetChoice("FinBank - Client Menu", CLIENT_MENU);
 
             switch (choice) {
                 case 1:
@@ -91,7 +91,7 @@ public class ClientMenu {
                 new MenuItem(2, "Current account")
         );
 
-        int accountChoice = menuService.displayMenuAndGetChoice("Enter your choice", accountTypes);
+        int accountChoice = menuService.displayMenuAndGetChoice("Choose Account Type", accountTypes);
         double initialBalance = menuService.getDoubleInput("Enter initial balance");
 
 

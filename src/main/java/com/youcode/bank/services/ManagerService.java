@@ -2,25 +2,28 @@ package com.youcode.bank.services;
 
 import com.youcode.bank.model.Manager;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
 public class ManagerService {
-    public ArrayList<Manager> managers = new ArrayList<>();
+    private final Map<String, Manager> managersByEmail = new HashMap<>();
 
     public void initializeManagerList() {
         Manager manager = new Manager("ayman", "ayman@gmail.com", "123456");
-        managers.add(manager);
+        managersByEmail.put(manager.getEmail(), manager);
     }
 
     public Manager addManager(Manager manager) {
-        managers.add(manager);
+        managersByEmail.put(manager.getEmail(), manager);
         return manager;
     }
 
     public Optional<Manager> login(String email, String password) {
-        return managers.stream()
-                .filter(manager -> manager.getEmail().equals(email) && manager.getPassword().equals(password))
-                .findFirst();
+        Manager m = managersByEmail.get(email);
+        if (m != null && m.getPassword().equals(password)) {
+            return Optional.of(m);
+        }
+        return Optional.empty();
     }
+
+    public List<Manager> getAllManagers() { return Collections.unmodifiableList(new ArrayList<>(managersByEmail.values())); }
 }

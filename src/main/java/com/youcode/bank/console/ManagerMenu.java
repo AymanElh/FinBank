@@ -34,7 +34,7 @@ public class ManagerMenu {
     public void show() {
         boolean running = true;
         while (running) {
-            int choice = menuService.displayMenuAndGetChoice("Enter your choice", MANAGER_MENU);
+            int choice = menuService.displayMenuAndGetChoice("FinBank - Manager Menu", MANAGER_MENU);
 
             switch (choice) {
                 case 1:
@@ -53,9 +53,9 @@ public class ManagerMenu {
     }
 
     private Client createNewClient() {
-        String name = menuService.getInputString("Name: ");
-        String email = menuService.getInputString("Email: ");
-        String password = menuService.getInputString("Password: ");
+        String name = menuService.getInputString("Name");
+        String email = menuService.getInputString("Email");
+        String password = menuService.getInputString("Password");
 
         Client client = new Client(name, email, password);
         clientService.addNewClient(client);

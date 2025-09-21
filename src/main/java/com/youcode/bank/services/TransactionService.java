@@ -16,7 +16,7 @@ import java.util.List;
 public class TransactionService {
     public static int transactionCounter = 1;
 
-    private static final String STATEMENTS_DIR = "../statements/";
+    private static final String STATEMENTS_DIR = "statements/";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
@@ -39,7 +39,7 @@ public class TransactionService {
 
         account.getHistoryOfTransactions().add(transaction);
         saveTransactionToFile(account.getAccountId(), transaction);
-        System.out.println("Deposit of " + amount + " success");
+        System.out.println("Deposit of " + amount + " succeeded");
         return true;
     }
 
@@ -57,7 +57,7 @@ public class TransactionService {
         account.setBalance(account.getBalance() - amount);
         account.getHistoryOfTransactions().add(transaction);
         saveTransactionToFile(account.getAccountId(), transaction);
-        System.out.println("Withdrawal successfully");
+        System.out.println("Withdrawal succeeded");
         return true;
     }
 
@@ -78,8 +78,8 @@ public class TransactionService {
         fromAccount.getHistoryOfTransactions().add(transaction);
         toAccount.getHistoryOfTransactions().add(transaction);
 
-        saveTransferTransactionToFile(fromAccount.getAccountId(), transaction, fromAccount.getAccountId(), toAccount.getAccountId());
-        System.out.println("Virement de " + amount + " effect aver success");
+        saveTransferToFile(fromAccount.getAccountId(), toAccount.getAccountId(), transaction);
+        System.out.println("Transfer of " + amount + " completed successfully");
         return true;
     }
 
@@ -87,7 +87,7 @@ public class TransactionService {
         List<Transaction> transactions = account.getHistoryOfTransactions();
 
         if (transactions.isEmpty()) {
-            System.out.println("No transaction for this account");
+            System.out.println("No transactions for this account");
             return;
         }
 

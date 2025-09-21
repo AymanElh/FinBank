@@ -11,13 +11,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BankAccountService {
-    ArrayList<BankAccount> bankAccounts = new ArrayList<>();
+    // Primary storage keyed by accountId
+    private final Map<String, BankAccount> accountsById = new HashMap<>();
     private static int accountCounter = 1000;
 
     public BankAccountService() {
@@ -25,7 +24,7 @@ public class BankAccountService {
     }
 
     public BankAccount addBankAccount(String accountType, double balance, Client client) throws AccountIsAlreadyExistException {
-        boolean hasExistingAccount = bankAccounts.stream()
+        boolean hasExistingAccount = accountsById.values().stream()
                 .anyMatch(account -> account.getOwner().getUserId().equals(client.getUserId())
                         && account.getClass().getSimpleName().toLowerCase().contains(accountType.split("-")[0]));
 
@@ -36,10 +35,10 @@ public class BankAccountService {
         BankAccount acc = null;
         if (accountType.equals("saving-account")) {
             acc = this.createSavingAccount(balance, client);
-            bankAccounts.add(acc);
+            accountsById.put(acc.getAccountId(), acc);
         } else if (accountType.equals("current-account")) {
             acc = this.createCurrentAccount(balance, client);
-            bankAccounts.add(acc);
+            accountsById.put(acc.getAccountId(), acc);
         }
         return acc;
     }
@@ -53,19 +52,19 @@ public class BankAccountService {
     }
 
     public List<BankAccount> getAllAccounts() {
-        return bankAccounts;
+        return Collections.unmodifiableList(new ArrayList<>(accountsById.values()));
     }
 
     public BankAccount getAccountById(String accountId) throws AccountNotFoundException {
-        return bankAccounts
-                .stream()
-                .filter(account -> account.getAccountId().equals(accountId))
-                .findFirst()
-                .orElseThrow(() -> new AccountNotFoundException("Account with id " + accountId + " Not found"));
+        BankAccount acc = accountsById.get(accountId);
+        if (acc == null) {
+            throw new AccountNotFoundException("Account with id " + accountId + " Not found");
+        }
+        return acc;
     }
 
     public List<BankAccount> getClientAccounts(Client client) {
-        return bankAccounts.stream()
+        return accountsById.values().stream()
                 .filter(account -> account.getOwner().getUserId().equals(client.getUserId()))
                 .collect(Collectors.toList());
     }

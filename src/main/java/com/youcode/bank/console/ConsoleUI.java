@@ -36,7 +36,7 @@ public class ConsoleUI {
 
     public void start() {
         while (true) {
-            int choice = menuService.displayMenuAndGetChoice("Enter your choice: ", MAIN_MENU);
+            int choice = menuService.displayMenuAndGetChoice("FinBank - Main Menu", MAIN_MENU);
 
             switch (choice) {
                 case 1:
@@ -58,8 +58,8 @@ public class ConsoleUI {
     }
 
     public void login(String role) {
-        String email = menuService.getInputString("Enter your email ");
-        String password = menuService.getInputString("Enter your password ");
+        String email = menuService.getInputString("Email");
+        String password = menuService.getInputString("Password");
 
         if (role.equals("client")) {
             Optional<Client> client = clientService.login(email, password);

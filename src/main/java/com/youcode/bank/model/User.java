@@ -53,6 +53,6 @@ public abstract class User {
 
     @Override
     public String toString() {
-        return String.format("** Manager infos *** \n \t ID: %s \n \t Name: %s \n \t Email: %s \n", this.getUserId(), this.getName(), this.getEmail());
+        return String.format("** User info **\n\tID: %s\n\tName: %s\n\tEmail: %s\n", this.getUserId(), this.getName(), this.getEmail());
     }
 }
